@@ -1,50 +1,54 @@
-﻿using System.Diagnostics;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 
 namespace FolderCopy;
 class Program
 {
-    private static string logFilePath = @"C:\Users\VMDK\Downloads\log.txt";
-    
     static void Main(string[] args)
     {
-        Console.WriteLine("To set up a copy job use the following format:");
-        Console.WriteLine("[Source folder path] [Target folder path]");      
+        string sourceFolder = args[0];
+        string targetFolder = args[1];
+        string logFilePath = args[2];
+        int copyJobInterval;
 
-        string sourceFolder = @"C:\Users\VMDK\Downloads\source";
-        string targetFolder = @"C:\Users\VMDK\Downloads\Target";
-        int copyJobInterval = 30000;
+        if (!Int32.TryParse(args[3], out copyJobInterval))
+        {
+            Console.WriteLine("Invalid synchronization interval specified.");
+            return;
+        }
+
+
+
 
         while (true)
         {
-            WriteLog("Copy Job started");
+            WriteLog(logFilePath, "Copy Job started");
 
             //create target folder if it doesn't exist
             if (!Directory.Exists(targetFolder))
             {
                 Directory.CreateDirectory(targetFolder);
-                WriteLog("Folder created");
+                WriteLog(logFilePath, "Folder created");
             }
 
-            CopyFiles(sourceFolder, targetFolder);
+            CopyFiles(logFilePath, sourceFolder, targetFolder);
 
-            RemoveDeletedFiles(targetFolder, sourceFolder);
+            RemoveDeletedFiles(logFilePath, targetFolder, sourceFolder);
 
-            WriteLog("Copy Job complete");
+            WriteLog(logFilePath, "Copy Job complete");
 
-            Thread.Sleep(copyJobInterval);
+            Thread.Sleep(copyJobInterval * 60000);
         }
         
 
     }
 
-    static void CopyFiles(string SourceFolder, string TargetFolder)
+    static void CopyFiles(string logFilePath, string sourceFolder, string targetFolder)
     {             
-        foreach (string sourceFile in Directory.GetFiles(SourceFolder))
+        foreach (string sourceFile in Directory.GetFiles(sourceFolder))
         {
             string sourceFileName = Path.GetFileName(sourceFile);
             string sourceFilePath = Path.Combine(sourceFileName, sourceFile);           
-            string targetFilePath = Path.Combine(TargetFolder, sourceFileName);
+            string targetFilePath = Path.Combine(targetFolder, sourceFileName);
             
 
             if (File.Exists(targetFilePath))
@@ -56,19 +60,19 @@ class Program
             }
                             
             File.Copy(sourceFile, targetFilePath, true);
-            WriteLog($"File copied: {sourceFilePath}");
+            WriteLog(logFilePath, $"File copied: {sourceFilePath}");
             
         }
     }
 
     //calculate md5 of both files if it already exists in target folder
-    static bool CompareMD5(string SourceFileName, string TargetFileName)
+    static bool CompareMD5(string sourceFileName, string targetFileName)
     {
         using (var md5 = MD5.Create())
         {
-            using (var readSourceFile = File.OpenRead(SourceFileName))
+            using (var readSourceFile = File.OpenRead(sourceFileName))
             {
-                using (var readTargetFile = File.OpenRead(TargetFileName))
+                using (var readTargetFile = File.OpenRead(targetFileName))
                 {
                     byte[] hashSourceFile = md5.ComputeHash(readSourceFile);
                     byte[] hashTargetFile = md5.ComputeHash(readTargetFile);
@@ -89,25 +93,25 @@ class Program
     }
 
     //compare the lists of files and remove deleted
-    static void RemoveDeletedFiles(string TargetFolder, string SourceFolder)
+    static void RemoveDeletedFiles(string logFilePath, string targetFolder, string sourceFolder)
     {
-        foreach(string targetFile in Directory.GetFiles(TargetFolder))
+        foreach(string targetFile in Directory.GetFiles(targetFolder))
         {
-            if (!File.Exists(Path.Combine(SourceFolder, Path.GetFileName(targetFile))))
+            if (!File.Exists(Path.Combine(sourceFolder, Path.GetFileName(targetFile))))
             {
                 File.Delete(targetFile);
-                WriteLog($"File deleted: {targetFile}");
+                WriteLog(logFilePath, $"File deleted: {targetFile}");
             }
             
         }
     }
 
     //Display log message in the console and write it into the file
-    private static void WriteLog(string message)
+    private static void WriteLog(string logFile, string message)
     {
         Console.WriteLine(message);
 
-        using (StreamWriter log = File.AppendText(logFilePath))
+        using (StreamWriter log = File.AppendText(logFile))
         {
             log.WriteLine($"[{DateTime.Now}] {message}");
         }
