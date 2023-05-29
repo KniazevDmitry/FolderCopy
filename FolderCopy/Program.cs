@@ -13,21 +13,28 @@ class Program
 
         string sourceFolder = @"C:\Users\VMDK\Downloads\source";
         string targetFolder = @"C:\Users\VMDK\Downloads\Target";
+        int copyJobInterval = 30000;
 
-        WriteLog("Copy Job started");
-              
-        //create target folder if it doesn't exist
-        if (!Directory.Exists(targetFolder))
+        while (true)
         {
-            Directory.CreateDirectory(targetFolder);
-            WriteLog("Folder created");
+            WriteLog("Copy Job started");
+
+            //create target folder if it doesn't exist
+            if (!Directory.Exists(targetFolder))
+            {
+                Directory.CreateDirectory(targetFolder);
+                WriteLog("Folder created");
+            }
+
+            CopyFiles(sourceFolder, targetFolder);
+
+            RemoveDeletedFiles(targetFolder, sourceFolder);
+
+            WriteLog("Copy Job complete");
+
+            Thread.Sleep(copyJobInterval);
         }
-               
-        CopyFiles(sourceFolder, targetFolder);
-
-        RemoveDeletedFiles(targetFolder, sourceFolder);
-
-        WriteLog("Copy Job complete");
+        
 
     }
 
