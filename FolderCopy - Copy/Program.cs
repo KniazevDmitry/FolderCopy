@@ -11,17 +11,12 @@ class Program
             Console.WriteLine("Please use this pattern of command line arguments: \nFolderCopy.exe SourceFolder, TargetFolder, SyncTime(in sec)");
         }
 
-        string sourceFolder = args[0];
-        string targetFolder = args[1];
-        string logFilePath = args[2];
-        int copyJobInterval;              
+        string sourceFolder = "C:\\Users\\VMDK\\Downloads\\source";
+        string targetFolder = "C:\\Users\\VMDK\\Downloads\\Target";
+        string logFilePath = "C:\\Users\\VMDK\\Downloads\\log.txt";
+        int copyJobInterval = 20;              
         
-        if (!Int32.TryParse(args[3], out copyJobInterval))
-        {
-            Console.WriteLine("Wrong Copy Job interval. Please enter the interval between runs in seconds. ");
-            return;
-        }
-
+        
         while (true)
         {
             WriteLog(logFilePath, "Copy Job started");
@@ -50,10 +45,10 @@ class Program
     }
 
     static void CopyFiles(string logFilePath, string sourceFolder, string targetFolder)
-    {
+    {             
         foreach (string sourceFilePath in Directory.GetFiles(sourceFolder))
         {
-            string sourceFileName = Path.GetFileName(sourceFilePath);
+            string sourceFileName = Path.GetFileName(sourceFilePath);                     
             string targetFilePath = Path.Combine(targetFolder, sourceFileName);
 
             if (File.Exists(targetFilePath))
@@ -63,9 +58,9 @@ class Program
                     continue;
                 }
             }
-
+                            
             File.Copy(sourceFilePath, targetFilePath, true);
-            WriteLog(logFilePath, $"File copied: {sourceFilePath}");
+            WriteLog(logFilePath, $"File copied: {sourceFilePath}");           
         }
     }
 
