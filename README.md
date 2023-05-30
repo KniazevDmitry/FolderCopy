@@ -4,6 +4,8 @@ This is a console program that periodically replicates a specified folder by cop
 
 The program checks for modified files since the last run and only copies them.
 
+Every copied or deleted file is logged.
+
 
 ## Usage
 
