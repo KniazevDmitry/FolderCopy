@@ -1,6 +1,6 @@
 # FolderCopy
 
-This is a console program that creates a replica of a specified folder by copying the files from source to target and deleting the removed files.
+This is a console program that periodically replicates a specified folder by copying the files from source to target and deleting the removed files.
 
 The program checks for modified files since the last run and only copies them.
 
