@@ -5,23 +5,32 @@ class Program
 {
     static void Main(string[] args)
     {
+        //The program should take exatcly 4 arguments
+        if (args.Length != 4)
+        {
+            Console.WriteLine("Please use this pattern of command line arguments: \nFolderCopy.exe SourceFolder, TargetFolder, SyncTime(in sec)");
+        }
+
         string sourceFolder = args[0];
         string targetFolder = args[1];
         string logFilePath = args[2];
-        int copyJobInterval;
-
+        int copyJobInterval;              
+        
         if (!Int32.TryParse(args[3], out copyJobInterval))
         {
-            Console.WriteLine("Invalid synchronization interval specified.");
+            Console.WriteLine("Wrong Copy Job interval. Please enter the interval between runs in seconds. ");
             return;
         }
-
-
-
 
         while (true)
         {
             WriteLog(logFilePath, "Copy Job started");
+
+            if (!Directory.Exists(sourceFolder))
+            {
+                WriteLog(logFilePath, $"Source folder doesn't exist: {args[0]}");
+                return;
+            }
 
             //create target folder if it doesn't exist
             if (!Directory.Exists(targetFolder))
@@ -36,10 +45,8 @@ class Program
 
             WriteLog(logFilePath, "Copy Job complete");
 
-            Thread.Sleep(copyJobInterval * 60000);
-        }
-        
-
+            Thread.Sleep(copyJobInterval * 1000); //1sec = 1000ms
+        }    
     }
 
     static void CopyFiles(string logFilePath, string sourceFolder, string targetFolder)
@@ -49,7 +56,6 @@ class Program
             string sourceFileName = Path.GetFileName(sourceFile);
             string sourceFilePath = Path.Combine(sourceFileName, sourceFile);           
             string targetFilePath = Path.Combine(targetFolder, sourceFileName);
-            
 
             if (File.Exists(targetFilePath))
             {
@@ -60,8 +66,7 @@ class Program
             }
                             
             File.Copy(sourceFile, targetFilePath, true);
-            WriteLog(logFilePath, $"File copied: {sourceFilePath}");
-            
+            WriteLog(logFilePath, $"File copied: {sourceFilePath}");           
         }
     }
 
@@ -87,8 +92,6 @@ class Program
                     }
                 }
             }
-
-
         }
     }
 
@@ -101,8 +104,7 @@ class Program
             {
                 File.Delete(targetFile);
                 WriteLog(logFilePath, $"File deleted: {targetFile}");
-            }
-            
+            }           
         }
     }
 
